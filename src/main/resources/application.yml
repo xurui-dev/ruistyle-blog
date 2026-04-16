@@ -1,0 +1,62 @@
+# ==========================================================
+# Spring Boot 核心配置
+# ==========================================================
+server:
+  port: 8080 # 启动端口，默认8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 单个文件大小限制
+      max-request-size: 50MB   # 单次请求总大小限制
+  application:
+    name: ruistyle-blog
+  
+  # ==========================================================
+  # 数据库连接配置 (针对 MySQL 8.x 优化)
+  # ==========================================================
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 注意修改下面的 IP、端口、数据库名(ruistyle_blog)、账号和密码
+    # 参数说明：
+    # useUnicode=true & characterEncoding=utf-8 : 支持中文字符
+    # serverTimezone=Asia/Shanghai : 设定为中国上海时区，防止插入时间错乱
+    # useSSL=false : 本地开发通常关闭 SSL
+    url: jdbc:mysql://127.0.0.1:3306/ruistyle_blog?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456 # 请替换为你的 MySQL 密码
+
+  # ==========================================================
+  # Jackson 序列化配置 (处理前后端交互时的时间格式问题)
+  # ==========================================================
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null # 返回给前端时，如果是 null 的字段就不返回了，节省带宽
+
+# ==========================================================
+# MyBatis Plus 进阶配置
+# ==========================================================
+mybatis-plus:
+  # 如果后续要写复杂的自定义 SQL，XML 文件放在 resources/mapper 下
+  mapper-locations: classpath*:/mapper/**/*.xml
+  
+  configuration:
+    # 开启驼峰命名自动映射 (例如数据库中的 view_count 会自动映射到 Java 实体类的 viewCount)
+    map-underscore-to-camel-case: true
+    # 开发环境开启 MyBatis 打印 SQL 语句，方便调试。正式上线部署时建议注释掉或改成日志级别
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+  global-config:
+    db-config:
+      # 全局主键类型：ASSIGN_ID (雪花算法分配长整型ID)
+      id-type: assign_id
+      # 逻辑删除配置 (0:未删除, 1:已删除)，与我们在 Entity 中加的 @TableLogic 配合使用
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+# 自定义上传路径配置
+upload:
+  # 在本地 Windows 开发时，存在 D 盘的专门数据夹里
+  # 等未来部署到 Linux 服务器时，可以在宝塔面板里把环境变量改到 /www/wwwroot/ruistyle/uploads/
+  path: D:/ruistyle_data/uploads/
