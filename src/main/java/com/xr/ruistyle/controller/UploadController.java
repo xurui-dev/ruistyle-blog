@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.xr.ruistyle.common.Result;
 import com.xr.ruistyle.common.BusinessException;
-
+// 记得在顶部引入这个包：
+import org.springframework.http.MediaType;
 import java.io.File;
 import java.io.IOException;
 
@@ -21,8 +22,11 @@ public class UploadController {
     @Value("${upload.path}")
     private String uploadPath;
 
+
+
+    // 将原来的 @PostMapping("/image") 改为：
     @Operation(summary = "图片上传")
-    @PostMapping("/image")
+    @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<String> uploadImage(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             throw new BusinessException(400, "上传文件不能为空");

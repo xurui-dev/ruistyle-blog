@@ -1,6 +1,7 @@
 package com.xr.ruistyle.controller;
 
 
+import com.xr.ruistyle.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -49,5 +50,29 @@ public class SystemController {
     public Result<Void> checkExceptionHandler() {
         // 主动抛出一个自定义业务异常
         throw new BusinessException(ResultCodeEnum.PARAM_ERROR.getCode(), "看到这条消息说明全局异常处理器已生效！");
+    }
+
+    @GetMapping("/jwt-test")
+    public Result<String> testJwt() {
+        // 1. 模拟登录成功，生成一个带有用户 ID 为 1001，名为 "XuRui" 的 Token
+        String token = JwtUtils.generateToken(1001L, "XuRui");
+        System.out.println("生成的 Token: " + token);
+
+        // 2. 验证这个 Token 是否合法
+        boolean isValid = JwtUtils.verifyToken(token);
+        System.out.println("Token 合法性: " + isValid);
+
+        // 3. 从 Token 里把 userId 挖出来
+        Long userId = JwtUtils.getUserId(token);
+        System.out.println("解析出的 UserId: " + userId);
+
+        return Result.success(token);
+    }
+
+    @GetMapping("/get-pwd")
+    public Result<String> getPwd() {
+        // 使用 Hutool 的 BCrypt 生成 123456 的密文
+        String hash = cn.hutool.crypto.digest.BCrypt.hashpw("123456", cn.hutool.crypto.digest.BCrypt.gensalt());
+        return Result.success("123456的正确密文是: " + hash);
     }
 }
