@@ -7,4 +7,6 @@ import com.xr.ruistyle.entity.Article;
 public interface ArticleService extends IService<Article> {
 
     void saveArticleWithTags(ArticleDTO articleDTO);
+    void updateArticleWithTags(ArticleDTO articleDTO);
+
 }

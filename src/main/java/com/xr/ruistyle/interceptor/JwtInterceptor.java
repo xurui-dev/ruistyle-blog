@@ -19,38 +19,49 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 1. 放行 OPTIONS 请求 (处理前后端分离的跨域预检请求)
+
+        // 🌟 1. 无条件放行所有 OPTIONS 请求（解决浏览器跨域预检报错问题）
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
-        // 2. 从请求头中获取 token (通常前端会放在 Authorization 头，或者自定义的 token 头中)
+        // 🌟 2. 无条件放行所有 GET 请求（因为我们博客的 GET 都是公开给读者的查询操作）
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+        // ==========================================
+        // 走到这里的，只剩下 POST、PUT、DELETE 等需要权限的写操作了
+        // ==========================================
+
+        // 3. 尝试从不同的 Header 中获取 token (优先取自定义的 token 头)
         String token = request.getHeader("token");
-        // 兼容一下标准的 Bearer Token 格式
+
+        // 如果 token 头里没有，再去兼容一下标准的 Authorization: Bearer 格式
         if (StrUtil.isBlank(token)) {
             token = request.getHeader("Authorization");
             if (StrUtil.isNotBlank(token) && token.startsWith("Bearer ")) {
-                token = token.substring(7);
+                token = token.substring(7); // 截取掉 "Bearer " 前缀
             }
         }
 
-        // 3. 校验 Token 是否存在
+        // 4. 终极校验：判断提取出来的 Token 是否存在
         if (StrUtil.isBlank(token)) {
-            log.warn("拦截到未携带Token的请求: {}", request.getRequestURI());
+            log.warn("拦截到未携带Token的危险请求: {}", request.getRequestURI());
             throw new BusinessException(401, "请先登录系统");
         }
 
-        // 4. 校验 Token 的合法性
+        // 5. 校验 Token 的合法性 (是否被篡改或过期)
         if (!JwtUtils.verifyToken(token)) {
             log.warn("拦截到无效或过期的Token请求: {}", request.getRequestURI());
             throw new BusinessException(401, "登录已过期，请重新登录");
         }
 
-        // 5. 将解析出的 userId 放入 request 中，方便后续 Controller 直接获取
+        // 6. 将解析出的 userId 放入 request 中，方便后续 Controller 直接获取
         Long userId = JwtUtils.getUserId(token);
         request.setAttribute("currentUserId", userId);
 
-        // 6. 验证通过，放行请求！
+        // 7. 验证通过，放行请求！
         return true;
     }
 }

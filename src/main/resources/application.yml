@@ -5,13 +5,17 @@ server:
   port: 8080 # 启动端口，默认8080
 
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
   servlet:
     multipart:
       max-file-size: 10MB      # 单个文件大小限制
       max-request-size: 50MB   # 单次请求总大小限制
   application:
     name: ruistyle-blog
-  
+
   # ==========================================================
   # 数据库连接配置 (针对 MySQL 8.x 优化)
   # ==========================================================
@@ -55,8 +59,14 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+
 # 自定义上传路径配置
 upload:
   # 在本地 Windows 开发时，存在 D 盘的专门数据夹里
   # 等未来部署到 Linux 服务器时，可以在宝塔面板里把环境变量改到 /www/wwwroot/ruistyle/uploads/
   path: D:/ruistyle_data/uploads/
+
+
+deepseek:
+  api-key: sk-7be287e539b748e4923d6319e130cadb
+  api-url: https://api.deepseek.com/chat/completions
